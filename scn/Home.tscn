@@ -1,0 +1,162 @@
+[gd_scene load_steps=14 format=3 uid="uid://dsqu3glscsydq"]
+
+[ext_resource type="Script" uid="uid://cem42t6xyvy08" path="res://scr/Home.cs" id="1_18j1i"]
+[ext_resource type="Texture2D" uid="uid://df7marhsu7vdy" path="res://icon.svg" id="2_newds"]
+[ext_resource type="Shader" uid="uid://bwhxvgxwh1gvp" path="res://shader/Blur.gdshader" id="3_3aa2c"]
+[ext_resource type="Texture2D" uid="uid://cjj3rtmuvr0qq" path="res://assets/fluent--circle-32-regular.svg" id="4_ig7ms"]
+[ext_resource type="Texture2D" uid="uid://qsd1x46l6iyx" path="res://assets/fluent--circle-24-regular.svg" id="5_ck65e"]
+[ext_resource type="Texture2D" uid="uid://dgrjw40js88pm" path="res://assets/fluent--previous-32-regular.svg" id="5_srhd5"]
+[ext_resource type="Texture2D" uid="uid://dvny2dt7lgpjw" path="res://assets/fluent--pause-32-regular.svg" id="6_ck65e"]
+[ext_resource type="Texture2D" uid="uid://bxrgoacsrlq5u" path="res://assets/fluent--next-32-regular.svg" id="7_4ft51"]
+[ext_resource type="Texture2D" uid="uid://dp6b616jqwcx2" path="res://assets/lucide--volume-2.svg" id="9_4ft51"]
+[ext_resource type="Texture2D" uid="uid://d234i0lhjd1rv" path="res://assets/solar--playlist-outline.svg" id="10_t08kl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_x7rlx"]
+shader = ExtResource("3_3aa2c")
+shader_parameter/lod = 5.0
+shader_parameter/darkness = 1.5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t08kl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2c7im"]
+
+[node name="Home" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_18j1i")
+
+[node name="Background" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_newds")
+
+[node name="Blur" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_x7rlx")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_bottom = 64
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="SearchBar" type="LineEdit" parent="MarginContainer/VBoxContainer/MarginContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+placeholder_text = "Search"
+alignment = 1
+
+[node name="VolumeController" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+icon = ExtResource("9_4ft51")
+flat = true
+
+[node name="Playlist" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+icon = ExtResource("10_t08kl")
+flat = true
+
+[node name="Content" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+
+[node name="TrackInfo" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Thumb" type="TextureRect" parent="MarginContainer/VBoxContainer/Content/TrackInfo"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+texture = ExtResource("2_newds")
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/Content/TrackInfo"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sample Text"
+horizontal_alignment = 1
+
+[node name="Author" type="Label" parent="MarginContainer/VBoxContainer/Content/TrackInfo"]
+unique_name_in_owner = true
+modulate = Color(0.595828, 0.595828, 0.595828, 1)
+layout_mode = 2
+text = "Example"
+horizontal_alignment = 1
+
+[node name="SongProgress" type="HSlider" parent="MarginContainer/VBoxContainer/Content"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_icons/grabber = ExtResource("4_ig7ms")
+theme_override_icons/grabber_highlight = ExtResource("5_ck65e")
+theme_override_styles/grabber_area = SubResource("StyleBoxEmpty_t08kl")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_2c7im")
+
+[node name="Controls" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+
+[node name="Previous" type="Button" parent="MarginContainer/VBoxContainer/Content/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+icon = ExtResource("5_srhd5")
+flat = true
+icon_alignment = 1
+
+[node name="PausePlay" type="Button" parent="MarginContainer/VBoxContainer/Content/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+icon = ExtResource("6_ck65e")
+flat = true
+icon_alignment = 1
+
+[node name="Next" type="Button" parent="MarginContainer/VBoxContainer/Content/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+icon = ExtResource("7_4ft51")
+flat = true
+icon_alignment = 1
+
+[node name="Player" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
