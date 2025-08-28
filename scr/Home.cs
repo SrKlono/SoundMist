@@ -7,21 +7,42 @@ public partial class Home : Control
 {
     TextureRect thumb, background;
     Label title, author;
-    HttpRequest httpRequest;
     AudioStreamPlayer player;
-    Dictionary song;
     LineEdit searchBar;
-    string mp3URL;
+    Soundcloud soundcloud;
+    MarginContainer header, footer;
 
-    class Song {
-        string name, author, streamURL;
-        ImageTexture thumbTexture;
-    }
-    Array playlist = [];
+    Array<int> playlist = [];
+    int playlistIndex = 0;
 
-    string baseURL = "https://api-v2.soundcloud.com/search?q=";
-    int songNumPerFetch = 4; // its acctually the index number of songs starting from 0, so 4 songNumPerFetch = 5 songs
-    string after = "&client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r&limit=&offset=0&linked_partitioning=1&app_locale=pt_BR";
+    /*
+        --------------TODO--------------
+        - [x] optimize the http requests
+        - [x] make playlists work
+        - [ ] playlist node/ui
+            - [ ] implementation
+            - [ ] final design
+            - [x] mockup
+        - [ ] start using song objects
+        - [ ] otimize http node use 
+
+
+        -------------BACKLOG------------
+        - [ ] search a song and continues playing indefinitely the song's station
+        - [ ] have controls over the current song
+            - [ ] next, previous on playlist
+            - [ ] stop, play current song
+            - [ ] volume
+        
+
+        ---------FUTURE FEATURES--------
+        - [ ] can play playlists and tracks through direct link paste
+        - [ ] add song to end of current playlist
+        - [ ] have controls over the playlist
+            - [ ] select any song to start playing immediatly
+            - [ ] delete a song from playlist
+        - [ ] improve latency by buffering songs
+    */
 
     public override void _Ready()
     {
@@ -31,92 +52,52 @@ public partial class Home : Control
         author = GetNode<Label>("%Author");
         player = GetNode<AudioStreamPlayer>("%Player");
         searchBar = GetNode<LineEdit>("%SearchBar");
-        httpRequest = GetNode<HttpRequest>("HTTPRequest");
+        soundcloud = GetNode<Soundcloud>("Soundcloud");
+        header = GetNode<MarginContainer>("%Header");
+        footer = GetNode<MarginContainer>("%Footer");
 
-        searchBar.TextSubmitted += searchSong;
-    }
+        searchBar.TextSubmitted += (string query) => {
+            playlistIndex = 0;
+            if(player.Playing) player.Stop();
+            soundcloud.searchSong(query);
+        };
 
-    private void searchSong(string query) {
-        if(player.Playing) player.Stop();
-        httpRequest.RequestCompleted += OnRequestCompleted;
-        httpRequest.Request(baseURL + query + after);
-    }
+        player.Finished += () => {
+            if(playlist.Count > 0) {
+                soundcloud.playNextSong(playlist[playlistIndex]);
+                playlistIndex ++;    
+            }
+        };
+
+        // node responsiveness
+        //header.Resized += () => keepHeight(header, 0.2f);
+        //footer.Resized += () => keepHeight(footer, 0.2f);
+
+        // soundcloud signals connect
+        soundcloud.titleAndAuthorFound += (value) => {
+            title.Text = value[0];
+            author.Text = value[1];
+        };
+
+        soundcloud.thumbFound += (value) => {
+            thumb.Texture = value;
+            background.Texture = value;
+        };
+
+        soundcloud.mp3URLFound += (value) => {
+            player.Stream = value;
+            player.Play();
+        };
+
+        soundcloud.stationFound += (value) => {
+            playlist = value;
+            GD.Print(playlist);
+        };
     
-    private void OnRequestCompleted(long result, long responseCode, string[] headers, byte[] body)
-    {
-        Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
-        //GD.Print(json["collection"]);
-        Array songList = (Array)json["collection"];
-
-        song = (Dictionary)songList[0];
-
-        string thumbURL = song["artwork_url"].ToString();
-        string trackTitle = song["title"].ToString();
-        string trackAuthor;
-
-        // dont know WHY TF this works only inverted(!), but it DOES. It doesn't make sense
-        if(!song.ContainsKey("publisher_metadata")) {
-            trackAuthor = ((Dictionary)song["publisher_metadata"])["artist"].ToString();
-        } else {
-            trackAuthor = ((Dictionary)song["user"])["username"].ToString();
-        }
-
-        httpRequest.RequestCompleted -= OnRequestCompleted;
-
-        httpRequest.RequestCompleted += OnThumbRequestCompleted;
-        httpRequest.Request(thumbURL.Replace("large", "t500x500"));
-
-        title.Text = trackTitle;
-        author.Text = trackAuthor;
     }
 
-    private void OnThumbRequestCompleted(long result, long responseCode, string[] headers, byte[] body) {
-        if (result != (long)HttpRequest.Result.Success) {
-            GD.PushError("Image couldn't be downloaded. Try a different image.");
-        }
-        
-        Image img = new();
-        var error = img.LoadJpgFromBuffer(body);
-        if(error != Error.Ok) GD.PushError("Couldn't load thumb");
-        
-        ImageTexture tex = ImageTexture.CreateFromImage(img);
-
-        httpRequest.RequestCompleted -= OnThumbRequestCompleted;
-        httpRequest.RequestCompleted += OnStreamRequestCompleted;
-
-        Array transcodings = (Array)((Dictionary)song["media"])["transcodings"];
-
-        string streamURL = ""; // catch error here later
-        foreach (Dictionary item in transcodings.Select(v => (Dictionary)v)) {
-            if(((string)item["url"]).Contains("stream/progressive"))
-                streamURL = (string)item["url"];
-        }
-
-        httpRequest.Request(streamURL + "?client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r");
-
-        thumb.Texture = tex;
-        background.Texture = tex;
-    }
-
-    private void OnStreamRequestCompleted(long result, long responseCode, string[] headers, byte[] body) {
-        Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
-
-        httpRequest.RequestCompleted -= OnStreamRequestCompleted;
-        httpRequest.RequestCompleted += OnMp3RequestCompleted;
-
-        mp3URL = json["url"].ToString();
-        GD.Print("MP3URL: " + mp3URL);
-
-        httpRequest.Request(mp3URL);
-    }
-
-    private void OnMp3RequestCompleted(long result, long responseCode, string[] headers, byte[] body) {
-        AudioStreamMP3 songAudio = new();
-        songAudio = AudioStreamMP3.LoadFromBuffer(body);
-
-        httpRequest.RequestCompleted -= OnMp3RequestCompleted;
-        
-        player.Stream = songAudio;
-        player.Play();
+    private void keepHeight(Control node, float percentage) {
+        Vector2 winSize = DisplayServer.WindowGetSize();
+        node.CustomMinimumSize = new(0, winSize.Y * percentage);
     }
 }

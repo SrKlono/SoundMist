@@ -1,15 +1,20 @@
-[gd_scene load_steps=14 format=3 uid="uid://dsqu3glscsydq"]
+[gd_scene load_steps=16 format=3 uid="uid://dsqu3glscsydq"]
 
 [ext_resource type="Script" uid="uid://cem42t6xyvy08" path="res://scr/Home.cs" id="1_18j1i"]
 [ext_resource type="Texture2D" uid="uid://df7marhsu7vdy" path="res://icon.svg" id="2_newds"]
 [ext_resource type="Shader" uid="uid://bwhxvgxwh1gvp" path="res://shader/Blur.gdshader" id="3_3aa2c"]
 [ext_resource type="Texture2D" uid="uid://cjj3rtmuvr0qq" path="res://assets/fluent--circle-32-regular.svg" id="4_ig7ms"]
-[ext_resource type="Texture2D" uid="uid://qsd1x46l6iyx" path="res://assets/fluent--circle-24-regular.svg" id="5_ck65e"]
 [ext_resource type="Texture2D" uid="uid://dgrjw40js88pm" path="res://assets/fluent--previous-32-regular.svg" id="5_srhd5"]
 [ext_resource type="Texture2D" uid="uid://dvny2dt7lgpjw" path="res://assets/fluent--pause-32-regular.svg" id="6_ck65e"]
 [ext_resource type="Texture2D" uid="uid://bxrgoacsrlq5u" path="res://assets/fluent--next-32-regular.svg" id="7_4ft51"]
 [ext_resource type="Texture2D" uid="uid://dp6b616jqwcx2" path="res://assets/lucide--volume-2.svg" id="9_4ft51"]
 [ext_resource type="Texture2D" uid="uid://d234i0lhjd1rv" path="res://assets/solar--playlist-outline.svg" id="10_t08kl"]
+[ext_resource type="Script" uid="uid://5ftbw63danur" path="res://scr/Soundcloud.cs" id="11_t08kl"]
+
+[sub_resource type="SystemFont" id="SystemFont_t08kl"]
+
+[sub_resource type="Theme" id="Theme_2c7im"]
+default_font = SubResource("SystemFont_t08kl")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_x7rlx"]
 shader = ExtResource("3_3aa2c")
@@ -27,6 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_2c7im")
 script = ExtResource("1_18j1i")
 
 [node name="Background" type="TextureRect" parent="."]
@@ -48,26 +54,27 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="Interface" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_bottom = 64
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-layout_mode = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 theme_override_constants/margin_left = 32
 theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 32
 
-[node name="SearchBar" type="LineEdit" parent="MarginContainer/VBoxContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Interface"]
+layout_mode = 2
+
+[node name="Header" type="MarginContainer" parent="Interface/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_bottom = 64
+
+[node name="SearchBar" type="LineEdit" parent="Interface/VBoxContainer/Header"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
@@ -76,63 +83,70 @@ size_flags_vertical = 0
 placeholder_text = "Search"
 alignment = 1
 
-[node name="VolumeController" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer"]
+[node name="VolumeController" type="Button" parent="Interface/VBoxContainer/Header"]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 icon = ExtResource("9_4ft51")
 flat = true
+icon_alignment = 1
 
-[node name="Playlist" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer"]
+[node name="Playlist" type="Button" parent="Interface/VBoxContainer/Header"]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 icon = ExtResource("10_t08kl")
 flat = true
 
-[node name="Content" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="TrackInfo" type="VBoxContainer" parent="Interface/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 3
 
-[node name="TrackInfo" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Content"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="Thumb" type="TextureRect" parent="MarginContainer/VBoxContainer/Content/TrackInfo"]
+[node name="Thumb" type="TextureRect" parent="Interface/VBoxContainer/TrackInfo"]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 size_flags_vertical = 3
 texture = ExtResource("2_newds")
+expand_mode = 2
 stretch_mode = 5
 
-[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/Content/TrackInfo"]
+[node name="Title" type="Label" parent="Interface/VBoxContainer/TrackInfo"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Sample Text"
 horizontal_alignment = 1
 
-[node name="Author" type="Label" parent="MarginContainer/VBoxContainer/Content/TrackInfo"]
+[node name="Author" type="Label" parent="Interface/VBoxContainer/TrackInfo"]
 unique_name_in_owner = true
 modulate = Color(0.595828, 0.595828, 0.595828, 1)
 layout_mode = 2
 text = "Example"
 horizontal_alignment = 1
 
-[node name="SongProgress" type="HSlider" parent="MarginContainer/VBoxContainer/Content"]
+[node name="Footer" type="MarginContainer" parent="Interface/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_top = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Interface/VBoxContainer/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="SongProgress" type="HSlider" parent="Interface/VBoxContainer/Footer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_icons/grabber = ExtResource("4_ig7ms")
-theme_override_icons/grabber_highlight = ExtResource("5_ck65e")
+theme_override_icons/grabber_highlight = ExtResource("4_ig7ms")
 theme_override_styles/grabber_area = SubResource("StyleBoxEmpty_t08kl")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_2c7im")
 
-[node name="Controls" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Content"]
+[node name="Controls" type="HBoxContainer" parent="Interface/VBoxContainer/Footer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Previous" type="Button" parent="MarginContainer/VBoxContainer/Content/Controls"]
+[node name="Previous" type="Button" parent="Interface/VBoxContainer/Footer/VBoxContainer/Controls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -140,7 +154,7 @@ icon = ExtResource("5_srhd5")
 flat = true
 icon_alignment = 1
 
-[node name="PausePlay" type="Button" parent="MarginContainer/VBoxContainer/Content/Controls"]
+[node name="PausePlay" type="Button" parent="Interface/VBoxContainer/Footer/VBoxContainer/Controls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -148,7 +162,7 @@ icon = ExtResource("6_ck65e")
 flat = true
 icon_alignment = 1
 
-[node name="Next" type="Button" parent="MarginContainer/VBoxContainer/Content/Controls"]
+[node name="Next" type="Button" parent="Interface/VBoxContainer/Footer/VBoxContainer/Controls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -159,4 +173,79 @@ icon_alignment = 1
 [node name="Player" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[node name="Soundcloud" type="Node" parent="."]
+script = ExtResource("11_t08kl")
+
+[node name="SearchRequest" type="HTTPRequest" parent="Soundcloud"]
+
+[node name="ThumbRequest" type="HTTPRequest" parent="Soundcloud"]
+
+[node name="StreamURLRequest" type="HTTPRequest" parent="Soundcloud"]
+
+[node name="MP3Request" type="HTTPRequest" parent="Soundcloud"]
+
+[node name="StationRequest" type="HTTPRequest" parent="Soundcloud"]
+
+[node name="SongRequest" type="HTTPRequest" parent="Soundcloud"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="SongQueue" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Blur" type="ColorRect" parent="CanvasLayer/SongQueue"]
+material = SubResource("ShaderMaterial_x7rlx")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/SongQueue"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 64
+theme_override_constants/margin_top = 64
+theme_override_constants/margin_right = 64
+theme_override_constants/margin_bottom = 64
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/SongQueue/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/SongQueue/MarginContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SongDisplay" type="HBoxContainer" parent="CanvasLayer/SongQueue/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Thumb" type="TextureRect" parent="CanvasLayer/SongQueue/MarginContainer/ScrollContainer/VBoxContainer/SongDisplay"]
+layout_mode = 2
+texture = ExtResource("2_newds")
+stretch_mode = 2
+
+[node name="HBoxContainer" type="VBoxContainer" parent="CanvasLayer/SongQueue/MarginContainer/ScrollContainer/VBoxContainer/SongDisplay"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="CanvasLayer/SongQueue/MarginContainer/ScrollContainer/VBoxContainer/SongDisplay/HBoxContainer"]
+layout_mode = 2
+text = "Labubu"
+
+[node name="Author" type="Label" parent="CanvasLayer/SongQueue/MarginContainer/ScrollContainer/VBoxContainer/SongDisplay/HBoxContainer"]
+modulate = Color(1, 1, 1, 0.592157)
+layout_mode = 2
+text = "Amongus"
