@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://dsqu3glscsydq"]
+[gd_scene load_steps=17 format=3 uid="uid://dsqu3glscsydq"]
 
 [ext_resource type="Script" uid="uid://cem42t6xyvy08" path="res://scr/Home.cs" id="1_18j1i"]
 [ext_resource type="Texture2D" uid="uid://df7marhsu7vdy" path="res://icon.svg" id="2_newds"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dgrjw40js88pm" path="res://assets/fluent--previous-32-regular.svg" id="5_srhd5"]
 [ext_resource type="Texture2D" uid="uid://dvny2dt7lgpjw" path="res://assets/fluent--pause-32-regular.svg" id="6_ck65e"]
 [ext_resource type="Texture2D" uid="uid://bxrgoacsrlq5u" path="res://assets/fluent--next-32-regular.svg" id="7_4ft51"]
+[ext_resource type="Script" uid="uid://cotvy6nilt77t" path="res://scr/SongProgress.cs" id="7_t08kl"]
 [ext_resource type="Texture2D" uid="uid://dp6b616jqwcx2" path="res://assets/lucide--volume-2.svg" id="9_4ft51"]
 [ext_resource type="Texture2D" uid="uid://d234i0lhjd1rv" path="res://assets/solar--playlist-outline.svg" id="10_t08kl"]
 [ext_resource type="Script" uid="uid://5ftbw63danur" path="res://scr/Soundcloud.cs" id="11_t08kl"]
@@ -136,12 +137,15 @@ layout_mode = 2
 theme_override_constants/separation = 16
 
 [node name="SongProgress" type="HSlider" parent="Interface/VBoxContainer/Footer/VBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_icons/grabber = ExtResource("4_ig7ms")
 theme_override_icons/grabber_highlight = ExtResource("4_ig7ms")
 theme_override_styles/grabber_area = SubResource("StyleBoxEmpty_t08kl")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_2c7im")
+step = 0.0
+script = ExtResource("7_t08kl")
 
 [node name="Controls" type="HBoxContainer" parent="Interface/VBoxContainer/Footer/VBoxContainer"]
 layout_mode = 2
