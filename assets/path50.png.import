@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dp6b616jqwcx2"
-path="res://.godot/imported/lucide--volume-2.svg-29371ee1effeb7e6cfe3be4343fc2b68.ctex"
+uid="uid://h48gvkj7023x"
+path="res://.godot/imported/path50.png-9fdfc9d96981df2970724ee8a8c99944.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/lucide--volume-2.svg"
-dest_files=["res://.godot/imported/lucide--volume-2.svg-29371ee1effeb7e6cfe3be4343fc2b68.ctex"]
+source_file="res://assets/path50.png"
+dest_files=["res://.godot/imported/path50.png-9fdfc9d96981df2970724ee8a8c99944.ctex"]
 
 [params]
 
@@ -25,13 +25,10 @@ mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
-process/fix_alpha_border=false
+process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

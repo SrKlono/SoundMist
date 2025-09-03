@@ -10,13 +10,21 @@ config_version=5
 
 [application]
 
-config/name="SCPlayer"
+config/name="SoundMist"
 run/main_scene="uid://dsqu3glscsydq"
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
-config/icon="res://icon.svg"
+run/max_fps=60
+run/low_processor_mode=true
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
+boot_splash/fullsize=false
+boot_splash/use_filter=false
+config/icon="uid://b1kfibxscptn7"
 
 [display]
 
+window/size/viewport_width=500
+window/size/viewport_height=500
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

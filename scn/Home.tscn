@@ -1,15 +1,16 @@
-[gd_scene load_steps=17 format=3 uid="uid://dsqu3glscsydq"]
+[gd_scene load_steps=31 format=3 uid="uid://dsqu3glscsydq"]
 
 [ext_resource type="Script" uid="uid://cem42t6xyvy08" path="res://scr/Home.cs" id="1_18j1i"]
 [ext_resource type="Texture2D" uid="uid://df7marhsu7vdy" path="res://icon.svg" id="2_newds"]
 [ext_resource type="Shader" uid="uid://bwhxvgxwh1gvp" path="res://shader/Blur.gdshader" id="3_3aa2c"]
+[ext_resource type="Script" uid="uid://cggvvradv0qnw" path="res://scr/VolumeController.cs" id="4_2c7im"]
 [ext_resource type="Texture2D" uid="uid://cjj3rtmuvr0qq" path="res://assets/fluent--circle-32-regular.svg" id="4_ig7ms"]
+[ext_resource type="Texture2D" uid="uid://cap6hqwfhma1t" path="res://assets/soundmist_white_nobg.svg" id="5_2c7im"]
 [ext_resource type="Texture2D" uid="uid://dgrjw40js88pm" path="res://assets/fluent--previous-32-regular.svg" id="5_srhd5"]
 [ext_resource type="Texture2D" uid="uid://dvny2dt7lgpjw" path="res://assets/fluent--pause-32-regular.svg" id="6_ck65e"]
 [ext_resource type="Texture2D" uid="uid://bxrgoacsrlq5u" path="res://assets/fluent--next-32-regular.svg" id="7_4ft51"]
 [ext_resource type="Script" uid="uid://cotvy6nilt77t" path="res://scr/SongProgress.cs" id="7_t08kl"]
 [ext_resource type="Texture2D" uid="uid://dp6b616jqwcx2" path="res://assets/lucide--volume-2.svg" id="9_4ft51"]
-[ext_resource type="Texture2D" uid="uid://d234i0lhjd1rv" path="res://assets/solar--playlist-outline.svg" id="10_t08kl"]
 [ext_resource type="Script" uid="uid://5ftbw63danur" path="res://scr/Soundcloud.cs" id="11_t08kl"]
 
 [sub_resource type="SystemFont" id="SystemFont_t08kl"]
@@ -17,14 +18,79 @@
 [sub_resource type="Theme" id="Theme_2c7im"]
 default_font = SubResource("SystemFont_t08kl")
 
+[sub_resource type="Gradient" id="Gradient_g240y"]
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_q4l6r"]
+gradient = SubResource("Gradient_g240y")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_x7rlx"]
 shader = ExtResource("3_3aa2c")
 shader_parameter/lod = 5.0
-shader_parameter/darkness = 1.5
+shader_parameter/darkness = 2.5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ouknj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t08kl"]
+bg_color = Color(0.00784314, 0.686275, 0.682353, 0.0588235)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fmjk1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kihcp"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q4l6r"]
+bg_color = Color(0.412152, 0.412152, 0.412152, 0.109804)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2c7im"]
+bg_color = Color(0, 0, 0, 0.396078)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_g240y"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t08kl"]
+content_margin_left = 30.0
+content_margin_top = 30.0
+content_margin_right = 30.0
+content_margin_bottom = 30.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2c7im"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_q4l6r"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fy0l1"]
+bg_color = Color(1, 1, 1, 0.0784314)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g240y"]
+bg_color = Color(0, 0, 0, 0.356863)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fy0l1"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
 
 [node name="Home" type="Control"]
 layout_mode = 3
@@ -44,7 +110,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_newds")
+texture = SubResource("GradientTexture1D_q4l6r")
 
 [node name="Blur" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_x7rlx")
@@ -73,30 +139,100 @@ layout_mode = 2
 [node name="Header" type="MarginContainer" parent="Interface/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/margin_bottom = 64
+theme_override_constants/margin_bottom = 16
 
-[node name="SearchBar" type="LineEdit" parent="Interface/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Interface/VBoxContainer/Header"]
+layout_mode = 2
+
+[node name="VolumeController" type="Button" parent="Interface/VBoxContainer/Header/HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 2
 size_flags_vertical = 0
-placeholder_text = "Search"
-alignment = 1
-
-[node name="VolumeController" type="Button" parent="Interface/VBoxContainer/Header"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
+focus_mode = 1
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ouknj")
 icon = ExtResource("9_4ft51")
 flat = true
 icon_alignment = 1
+script = ExtResource("4_2c7im")
 
-[node name="Playlist" type="Button" parent="Interface/VBoxContainer/Header"]
+[node name="VSlider" type="VSlider" parent="Interface/VBoxContainer/Header/HBoxContainer/VolumeController"]
+custom_minimum_size = Vector2(32, 100)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 122.0
+offset_right = 48.0
+offset_bottom = 222.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(-1, -1)
+focus_mode = 1
+theme_override_icons/grabber = ExtResource("4_ig7ms")
+theme_override_icons/grabber_highlight = ExtResource("4_ig7ms")
+theme_override_styles/slider = SubResource("StyleBoxFlat_t08kl")
+theme_override_styles/grabber_area = SubResource("StyleBoxEmpty_fmjk1")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_kihcp")
+step = 0.0
+
+[node name="ProgressBar" type="ProgressBar" parent="Interface/VBoxContainer/Header/HBoxContainer/VolumeController/VSlider"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -2.0
+offset_top = 100.0
+offset_right = 2.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1, -1)
+step = 0.0
+fill_mode = 2
+show_percentage = false
+
+[node name="LeaveBox" type="Control" parent="Interface/VBoxContainer/Header/HBoxContainer/VolumeController/VSlider"]
+z_index = -1
+custom_minimum_size = Vector2(200, 400)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -200.0
+offset_right = 100.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="SearchBar" type="LineEdit" parent="Interface/VBoxContainer/Header/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(270, 0)
 layout_mode = 2
-size_flags_horizontal = 8
+size_flags_horizontal = 3
 size_flags_vertical = 0
-icon = ExtResource("10_t08kl")
+focus_mode = 1
+theme_override_colors/caret_color = Color(1, 1, 1, 0.635294)
+theme_override_styles/focus = SubResource("StyleBoxFlat_q4l6r")
+theme_override_styles/normal = SubResource("StyleBoxFlat_2c7im")
+placeholder_text = "Search"
+alignment = 1
+
+[node name="Playlist" type="Button" parent="Interface/VBoxContainer/Header/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 0
+focus_mode = 1
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ouknj")
 flat = true
 
 [node name="TrackInfo" type="VBoxContainer" parent="Interface/VBoxContainer"]
@@ -110,27 +246,25 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-texture = ExtResource("2_newds")
-expand_mode = 2
+texture = ExtResource("5_2c7im")
+expand_mode = 3
 stretch_mode = 5
 
 [node name="Title" type="Label" parent="Interface/VBoxContainer/TrackInfo"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Sample Text"
 horizontal_alignment = 1
 
 [node name="Author" type="Label" parent="Interface/VBoxContainer/TrackInfo"]
 unique_name_in_owner = true
 modulate = Color(0.595828, 0.595828, 0.595828, 1)
 layout_mode = 2
-text = "Example"
 horizontal_alignment = 1
 
 [node name="Footer" type="MarginContainer" parent="Interface/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/margin_top = 32
+theme_override_constants/margin_top = 16
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Interface/VBoxContainer/Footer"]
 layout_mode = 2
@@ -138,22 +272,43 @@ theme_override_constants/separation = 16
 
 [node name="SongProgress" type="HSlider" parent="Interface/VBoxContainer/Footer/VBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
+size_flags_vertical = 10
 theme_override_icons/grabber = ExtResource("4_ig7ms")
 theme_override_icons/grabber_highlight = ExtResource("4_ig7ms")
+theme_override_styles/slider = SubResource("StyleBoxEmpty_g240y")
 theme_override_styles/grabber_area = SubResource("StyleBoxEmpty_t08kl")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_2c7im")
 step = 0.0
 script = ExtResource("7_t08kl")
 
+[node name="ProgressBar" type="ProgressBar" parent="Interface/VBoxContainer/Footer/VBoxContainer/SongProgress"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+step = 0.0
+show_percentage = false
+
 [node name="Controls" type="HBoxContainer" parent="Interface/VBoxContainer/Footer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Previous" type="Button" parent="Interface/VBoxContainer/Footer/VBoxContainer/Controls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+focus_mode = 1
+theme_override_styles/focus = SubResource("StyleBoxEmpty_q4l6r")
+theme_override_styles/hover = SubResource("StyleBoxFlat_fy0l1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_g240y")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fy0l1")
 icon = ExtResource("5_srhd5")
 flat = true
 icon_alignment = 1
@@ -162,6 +317,11 @@ icon_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+focus_mode = 1
+theme_override_styles/focus = SubResource("StyleBoxEmpty_q4l6r")
+theme_override_styles/hover = SubResource("StyleBoxFlat_fy0l1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_g240y")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fy0l1")
 icon = ExtResource("6_ck65e")
 flat = true
 icon_alignment = 1
@@ -170,6 +330,11 @@ icon_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+focus_mode = 1
+theme_override_styles/focus = SubResource("StyleBoxEmpty_q4l6r")
+theme_override_styles/hover = SubResource("StyleBoxFlat_fy0l1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_g240y")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fy0l1")
 icon = ExtResource("7_4ft51")
 flat = true
 icon_alignment = 1
@@ -253,3 +418,17 @@ text = "Labubu"
 modulate = Color(1, 1, 1, 0.592157)
 layout_mode = 2
 text = "Amongus"
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+step = 0.0
+show_percentage = false

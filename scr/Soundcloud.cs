@@ -1,160 +1,221 @@
+using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Godot;
 using Godot.Collections;
 
 public partial class Soundcloud : Node
 {
-    [Signal] public delegate void songDataFoundEventHandler( Dictionary<string, string> value );
-    [Signal] public delegate void thumbFoundEventHandler( ImageTexture value);
-    [Signal] public delegate void mp3URLFoundEventHandler( AudioStreamMP3 value );
-    [Signal] public delegate void stationFoundEventHandler( Array<int> value );
+    [Signal] public delegate void SongDataFoundEventHandler(Dictionary<string, string> value);
+    [Signal] public delegate void ThumbFoundEventHandler(ImageTexture value);
+    [Signal] public delegate void Mp3UrlFoundEventHandler(AudioStreamMP3 value);
+    [Signal] public delegate void StationFoundEventHandler(Array<int> value);
+    [Signal] public delegate void SkipSongEventHandler();
+    [Signal] public delegate void NoTracksFoundEventHandler();
 
-    HttpRequest searchRequest, thumbRequest, streamURLRequest, mp3Request, stationRequest, singleSongRequest;
-    string baseURL = "https://api-v2.soundcloud.com/search?q=";
-    string after = "&client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r&offset=0&linked_partitioning=1&app_locale=pt_BR";
-    string stationBaseURL = "https://api-v2.soundcloud.com/resolve?url=https%3A//soundcloud.com/discover/sets/track-stations%";
-    string stationAfter = "&client_id=7mtmc4DOqfwBtnxQCjHDXvghFjF9MQMM&app_version=1756304203&app_locale=pt_BR";
-    
-    /*  
-        3A1983589551
-          1983589551
-        example station 
-        
-        https://api-v2.soundcloud.com/tracks/1983589551?client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r
-        https://api-v2.soundcloud.com/resolve?url=https%3A//soundcloud.com/discover/sets/track-stations%3A1983589551&client_id=7mtmc4DOqfwBtnxQCjHDXvghFjF9MQMM&app_version=1756304203&app_locale=pt_BR
+    private HttpRequest searchRequest, thumbRequest, streamUrlRequest, mp3Request, stationRequest, singleSongRequest;
+    private string clientId; // TODO: move to config/env
+    private const string baseSearchUrl = "https://api-v2.soundcloud.com/search?q=";
+    private const string searchParams = "&offset=0&linked_partitioning=1&app_locale=pt_BR";
+    private const string stationBaseUrl = "https://api-v2.soundcloud.com/resolve?url=https%3A//soundcloud.com/discover/sets/track-stations%3A";
+    private const string trackUrl = "https://api-v2.soundcloud.com/tracks/";
 
-        the station only grabs the songs IDs, the fetching of the song data only happens as the user scrolls down
-        so my approach should be similar, fetch ~10 songs and stretch that as they play, to always keep +10 songs
-        in queue
-    */
-    
+    private string thumbUrl;
+
     public override void _Ready()
     {
         searchRequest = GetNode<HttpRequest>("SearchRequest");
         thumbRequest = GetNode<HttpRequest>("ThumbRequest");
-        streamURLRequest = GetNode<HttpRequest>("StreamURLRequest");
+        streamUrlRequest = GetNode<HttpRequest>("StreamURLRequest");
         mp3Request = GetNode<HttpRequest>("MP3Request");
         stationRequest = GetNode<HttpRequest>("StationRequest");
         singleSongRequest = GetNode<HttpRequest>("SongRequest");
 
         searchRequest.RequestCompleted += processSearchRequest;
         thumbRequest.RequestCompleted += processThumbRequest;
-        streamURLRequest.RequestCompleted += processStreamURLRequest;
-        mp3Request.RequestCompleted += processMP3Request;
+        streamUrlRequest.RequestCompleted += processStreamUrlRequest;
+        mp3Request.RequestCompleted += processMp3Request;
         stationRequest.RequestCompleted += processStationRequest;
         singleSongRequest.RequestCompleted += processSingleSong;
+
+        HttpRequest clientIdRequester = new();
+        AddChild(clientIdRequester);
+
+        clientIdRequester.RequestCompleted += (u, c, h, b) => {
+            getClientID(u, c, h, b);
+            clientIdRequester.QueueFree();
+        };
+
+        clientIdRequester.Request(
+            "https://m.soundcloud.com/",
+            ["User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 16_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/99.0.4844.47 Mobile/15E148 Safari/604.1"]
+        );
     }
 
-    public void searchSong(string query, int songNum = 1) {
-        searchRequest.Request(baseURL + query + "&limit=" + songNum + after );
+    public void searchSong(string query, int songNum = 1)
+    {
+        string url = $"{baseSearchUrl}{query}&limit={songNum}&client_id={clientId}{searchParams}";
+        searchRequest.Request(url);
     }
 
-    public void playSongById(int songId) {
-        singleSongRequest.Request("https://api-v2.soundcloud.com/tracks/" + songId + "?client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r");
+    public void getClientID(long result, long responseCode, string[] headers, byte[] body)
+    {
+        string response = Encoding.UTF8.GetString(body);
+
+        string pattern = @"""clientId"":""(\w+?)""";
+        Match match = Regex.Match(response, pattern);
+
+        clientId = match.Success ? match.Groups[1].Value : null;
     }
 
-    private void processSingleSong(long result, long responseCode, string[] headers, byte[] body) {
-        if (result != (long)HttpRequest.Result.Success) {
+    public void playSongById(int songId)
+    {
+        string url = $"{trackUrl}{songId}?client_id={clientId}";
+        singleSongRequest.Request(url);
+    }
+
+    private void processSingleSong(long result, long responseCode, string[] headers, byte[] body)
+    {
+        if (result != (long)HttpRequest.Result.Success)
+        {
             GD.PushError("Song request couldn't be completed.");
             return;
         }
 
         Dictionary songData = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
-        streamURLRequest.Request(processSong(songData) + "?client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r");
+        string streamUrl = processSong(songData);
+
+        if(streamUrl == string.Empty) EmitSignal(Soundcloud.SignalName.SkipSong); 
+
+        streamUrlRequest.Request($"{streamUrl}?client_id={clientId}"); // ERR mr. loverman - invalid url
     }
 
-    private void processSearchRequest(long result, long responseCode, string[] headers, byte[] body) {
-        if (result != (long)HttpRequest.Result.Success) {
-            GD.PushError("Song request couldn't be completed.");
+    private void processSearchRequest(long result, long responseCode, string[] headers, byte[] body)
+    {
+        if (result != (long)HttpRequest.Result.Success)
+        {
+            GD.PushError("Search request couldn't be completed.");
             return;
         }
-        
+
         Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
         Array songList = (Array)json["collection"];
-
-        Dictionary songData = (Dictionary)songList[0];
-        
-        streamURLRequest.Request(processSong(songData) + "?client_id=ZhY1ZEiuWYBY7krRgevXg7fRXCIaRw6r");
-        stationRequest.Request(stationBaseURL + "3A" + (int)songData["id"] + stationAfter);
-    }
-
-    private void processStationRequest(long result, long responseCode, string[] headers, byte[] body) {
-        Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
-        Array stationSongList = (Array)json["tracks"];
-        
-        Array<int> IdList = [];
-        
-        foreach (Dictionary item in stationSongList.Select(v => (Dictionary)v)) {
-            IdList.Add((int)item["id"]);
-        }
-
-        EmitSignal(Soundcloud.SignalName.stationFound, IdList);
-    }
-
-    private void processThumbRequest(long result, long responseCode, string[] headers, byte[] body) {
-        if (result != (long)HttpRequest.Result.Success) {
-            // todo check headers for the input
-
-            GD.PushError("Thumb couldn't be downloaded.");
+        if (songList.Count == 0)
+        {
+            GD.PushWarning("No songs found.");
             return;
         }
-        
-        Image img = new();
-        var error = img.LoadJpgFromBuffer(body);
-        if(error != Error.Ok) GD.PushError("Couldn't load thumb");
-        
-        ImageTexture tex = ImageTexture.CreateFromImage(img);
 
-        EmitSignal(Soundcloud.SignalName.thumbFound, tex);
+        Dictionary firstSong = (Dictionary)songList[0];
+
+        if((string)firstSong["kind"] != "track") {
+            EmitSignal(Soundcloud.SignalName.NoTracksFound);
+        }
+
+        GD.Print(firstSong);
+
+        string streamUrl = processSong(firstSong);
+
+        if(streamUrl == string.Empty) EmitSignal(Soundcloud.SignalName.SkipSong);
+
+        streamUrlRequest.Request($"{streamUrl}?client_id={clientId}");
+        stationRequest.Request($"{stationBaseUrl}{(int)firstSong["id"]}&client_id={clientId}");
     }
-    
-    private void processStreamURLRequest(long result, long responseCode, string[] headers, byte[] body) {
-        Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();        
+
+    private void processStationRequest(long result, long responseCode, string[] headers, byte[] body)
+    {
+        Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
+        Array stationTracks = (Array)json["tracks"];
+
+        Array<int> idList = [];
+        foreach (Dictionary track in stationTracks.Select(v => (Dictionary)v))
+        {
+            idList.Add((int)track["id"]);
+        }
+
+        EmitSignal(SignalName.StationFound, idList);
+    }
+
+    private void processThumbRequest(long result, long responseCode, string[] headers, byte[] body)
+    {
+        if (result != (long)HttpRequest.Result.Success)
+        {
+            GD.PushError("Thumbnail couldn't be downloaded.");
+            return;
+        }
+
+        Image img = new();
+        Error error = img.LoadJpgFromBuffer(body);
+        if (error != Error.Ok)
+        {
+            string lowResThumb = thumbUrl.Replace("t500x500", "large");
+            thumbRequest.Request(lowResThumb);
+            GD.PushError("Couldn't load thumbnail.");
+            return;
+        }
+
+        ImageTexture tex = ImageTexture.CreateFromImage(img);
+        EmitSignal(SignalName.ThumbFound, tex);
+    }
+
+    private void processStreamUrlRequest(long result, long responseCode, string[] headers, byte[] body)
+    {
+        Dictionary json = Json.ParseString(Encoding.UTF8.GetString(body)).AsGodotDictionary();
         mp3Request.Request(json["url"].ToString());
     }
 
-    private void processMP3Request(long result, long responseCode, string[] headers, byte[] body) {
-        AudioStreamMP3 songAudio = new();
-        songAudio = AudioStreamMP3.LoadFromBuffer(body);
-        
-        EmitSignal(Soundcloud.SignalName.mp3URLFound, songAudio);
+    private void processMp3Request(long result, long responseCode, string[] headers, byte[] body)
+    {
+        AudioStreamMP3 songAudio = AudioStreamMP3.LoadFromBuffer(body);
+        EmitSignal(SignalName.Mp3UrlFound, songAudio);
     }
 
-    private string processSong(Dictionary songData) {
-        string thumbURL = songData["artwork_url"].ToString();
+    private string processSong(Dictionary songData)
+    {
+        thumbUrl = songData["artwork_url"].ToString();
         string trackTitle = songData["title"].ToString();
-        string trackAuthor = "unknown";
         string duration = songData["duration"].ToString();
 
-        GD.Print(songData);
+        // Default author fallback
+        string trackAuthor = "unknown";
 
-        // dont know WHY TF this works only inverted(!), but it DOES, and it doesn't make any sense
-        if(!songData.ContainsKey("publisher_metadata")) {
+        // Logic note: original code had inverted logic. Keeping it as-is, but worth checking API docs.
+        if (!songData.ContainsKey("publisher_metadata"))
+        {
             trackAuthor = ((Dictionary)songData["publisher_metadata"])["artist"].ToString();
-        } else {
+        }
+        else
+        {
             trackAuthor = ((Dictionary)songData["user"])["username"].ToString();
         }
 
-        thumbRequest.Request(thumbURL.Replace("large", "t500x500"));
+        string highResThumb = thumbUrl.Replace("large", "t500x500");
+        thumbRequest.Request(highResThumb);
 
-        Array transcodings = (Array)((Dictionary)songData["media"])["transcodings"];
+        Array<Dictionary> transcodings = (Array<Dictionary>)((Dictionary)songData["media"])["transcodings"];
+        string streamUrl = transcodings
+            .Select(item => (string)item["url"])
+            .FirstOrDefault(url => url.Contains("stream/progressive")) ?? string.Empty;
 
-        string streamURL = ""; // catch error here later
-        foreach (Dictionary item in transcodings.Select(v => (Dictionary)v)) {
-            if(((string)item["url"]).Contains("stream/progressive"))
-                streamURL = (string)item["url"];
+        if(streamUrl == string.Empty) {
+            streamUrl = transcodings
+                .Select(item => (string)item["url"])
+                .FirstOrDefault(url => url.Contains("preview/progressive")) ?? string.Empty;
+            trackTitle += " (preview)";
         }
 
+
         EmitSignal(
-            Soundcloud.SignalName.songDataFound,
-            new Dictionary<string, string>{
-                {"title", trackTitle}, 
+            SignalName.SongDataFound,
+            new Dictionary<string, string>
+            {
+                {"title", trackTitle},
                 {"author", trackAuthor},
                 {"duration", duration}
             }
         );
 
-        return streamURL;
+        return streamUrl;
     }
 }

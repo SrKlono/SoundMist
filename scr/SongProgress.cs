@@ -3,25 +3,79 @@ using System;
 
 public partial class SongProgress : HSlider
 {
+    [Signal] public delegate void skipSongToValueEventHandler(float value);
+
     Tween tween;
-    public void start(int duration) {
+    ProgressBar progressBar;
+    double previousValue;
+    int currentDuration;
+
+    public override void _Ready()
+    {
+        progressBar = GetNode<ProgressBar>("ProgressBar");
+
+        DragStarted += () =>
+        {
+            previousValue = Value;
+            pause();
+            ValueChanged += syncValues;
+        };
+
+        DragEnded += jumpSongToValue;
+    }
+
+    public void start(int duration, double startFromPercentage = 0)
+    {
         tween?.Kill();
         tween = CreateTween();
 
-        GD.Print(duration);
+        currentDuration = duration;
+        duration /= 1000;
 
         tween.TweenProperty(
-            this, HSlider.PropertyName.Value.ToString(),
-            MaxValue, duration/1000
+            progressBar, ProgressBar.PropertyName.Value.ToString(),
+            progressBar.MaxValue, duration - duration * (startFromPercentage / 100)
         )
-        .From(0);
+        .From(startFromPercentage);
+
+        tween.Parallel();
+
+        tween.TweenProperty(
+            this, SongProgress.PropertyName.Value.ToString(),
+            this.MaxValue, duration - duration * (startFromPercentage / 100)
+        )
+        .From(startFromPercentage);
     }
 
-    public void stop() {
+    private void jumpSongToValue(bool valueChanged)
+    {
+        ValueChanged -= syncValues;
+        if (valueChanged)
+        {
+            EmitSignal(SongProgress.SignalName.skipSongToValue, Value / 100);
+            start(currentDuration, Value);
+        }
+    }
+
+    private void syncValues(double value)
+    {
+        progressBar.Value = value;
+    }
+
+    public void stop()
+    {
+        tween?.Stop();
+        progressBar.Value = 0;
+        Value = 0;
+    }
+
+    public void pause()
+    {
         tween?.Pause();
     }
 
-    public void resume() {
+    public void resume()
+    {
         tween.Play();
     }
 }
