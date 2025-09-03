@@ -30,7 +30,7 @@ window/stretch/aspect="expand"
 
 [dotnet]
 
-project/assembly_name="SCPlayer"
+project/assembly_name="SoundMist"
 
 [rendering]
 

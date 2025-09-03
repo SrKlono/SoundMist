@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCPlayer", "SCPlayer.csproj", "{827DEC73-C050-4247-B651-42C69706BD07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMist", "SoundMist.csproj", "{827DEC73-C050-4247-B651-42C69706BD07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
