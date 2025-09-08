@@ -2,6 +2,7 @@
 
 *A lightweight Godot/C# music player powered by SoundCloud's internal API.*
 
+
 ## Overview
 
 **SoundMist** is a custom-built music streaming application created with **Godot Engine (C#)**.
@@ -15,6 +16,7 @@ The app focuses on simplicity:
 
 Unlike typical SoundCloud integrations, **no manual `client_id` setup is needed** — SoundMist automatically retrieves it behind the scenes.
 
+
 ## Showcase 📸
 
 ### Screenshots
@@ -27,12 +29,14 @@ Unlike typical SoundCloud integrations, **no manual `client_id` setup is needed*
 
 ![](./assets/demo.gif)
 
+
 ## Features
 
 - 🔍 **Search by song name**
 - 🎶 **Station-based playback** (auto-generated playlists with similar tracks)
 - ⚡ **Automatic `client_id` resolution** (no need for manual credentials)
 - 🖥️ Built in **Godot Engine with C#**, providing a smooth and efficient desktop experience
+
 
 ## Limitations
 
@@ -41,11 +45,13 @@ Since the app relies on **SoundCloud's internal API**:
 - Only **track searching** and **station fetching** are supported.
 - Advanced features like playlist management, user authentication, or direct track streaming are not available.
 
+
 ## Download 🚀
 
 👉 [Download the latest release here](https://github.com/srklono/soundmist/releases)
 
 Available for **Windows**, **Linux**, and **macOS** (depending on release builds).
+
 
 ## Getting Started (From Source)
 
@@ -63,6 +69,7 @@ Available for **Windows**, **Linux**, and **macOS** (depending on release builds
    ```
 2. Open the project in Godot (Mono version).
 3. Build & run the project.
+
 
 ## Why SoundMist?
 
